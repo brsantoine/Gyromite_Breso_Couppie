@@ -11,15 +11,19 @@ import modele.deplacements.Gravite;
 import modele.deplacements.Ordonnanceur;
 
 import java.awt.Point;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.util.HashMap;
+import java.util.Iterator;
 
 /** Actuellement, cette classe gère les postions
  * (ajouter conditions de victoire, chargement du plateau, etc.)
  */
 public class Jeu {
 
-    public static final int SIZE_X = 20;
-    public static final int SIZE_Y = 10;
+    public static final int SIZE_X = 10;
+    public static final int SIZE_Y = 5;
 
     // compteur de déplacements horizontal et vertical (1 max par défaut, à chaque pas de temps)
     private HashMap<Entite, Integer> cmptDeplH = new HashMap<Entite, Integer>();
@@ -63,7 +67,9 @@ public class Jeu {
 
         Controle4Directions.getInstance().addEntiteDynamique(hector);
         ordonnanceur.add(Controle4Directions.getInstance());
-
+        
+        chargerNiveau(1);
+       /*
         // murs extérieurs horizontaux
         for (int x = 0; x < 20; x++) {
             addEntite(new Mur(this), x, 0);
@@ -77,9 +83,36 @@ public class Jeu {
         }
 
         addEntite(new Mur(this), 2, 6);
-        addEntite(new Mur(this), 3, 6);
+        addEntite(new Mur(this), 3, 6);*/
     }
 
+    private void chargerNiveau(int numeroNiveau) {
+    	String niveau = "Maps/niveau" + numeroNiveau + ".map";
+    	File file = new File(niveau);
+    	int lineNumber = 0;
+    	
+    	try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+    	    String line = "";
+    	    while ((line = br.readLine()) != null) {
+    	    	for (int i = 0; i < line.length(); i++) {
+    	    		switch(line.charAt(i)) {
+    	    		case 'W' :
+    	    			addEntite(new Mur(this), i, lineNumber);
+    	    			break;
+    	    		/*case '' :
+    	    			addEntite(new (this), i, lineNumber);
+    	    			break;*/
+    	    		default :
+    	    			break;
+    	    		}
+    	        }
+    	    	lineNumber++;
+    	    }
+    	} catch (Exception e) {
+    	    System.out.println("GENERATION MAPS : Lecture de fichier rat�.");
+    	}
+    }
+    
     private void addEntite(Entite e, int x, int y) {
         grilleEntites[x][y] = e;
         map.put(e, new Point(x, y));
