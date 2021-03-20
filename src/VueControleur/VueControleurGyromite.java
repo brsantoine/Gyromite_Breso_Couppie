@@ -33,7 +33,7 @@ public class VueControleurGyromite extends JFrame implements Observer {
     private ImageIcon icoHero;
     private ImageIcon icoVide;
     private ImageIcon icoMur;
-    private ImageIcon icoColonne;
+    private ImageIcon icoColonne, icoColonneRougeHaut, icoColonneRougeCentre, icoColonneRougeBas;
 
     private JLabel[][] tabJLabel; // cases graphique (au moment du rafraichissement, chaque case va être associée à une icône, suivant ce qui est présent dans le modèle)
 
@@ -67,6 +67,12 @@ public class VueControleurGyromite extends JFrame implements Observer {
         icoHero = chargerIcone("Images/Pacman.png");
         icoVide = chargerIcone("Images/Vide.png");
         icoColonne = chargerIcone("Images/Colonne.png");
+        icoColonneRougeHaut = chargerIcone("Images/ColonneRougeHaut.png");
+        icoColonneRougeCentre = chargerIcone("Images/ColonneRougeCentre.png");
+        icoColonneRougeBas = chargerIcone("Images/ColonneRougeBas.png");
+        /*icoColonneBleuHaut = chargerIcone("Images/Colonne.png");
+        icoColonneBleuCentre = chargerIcone("Images/Colonne.png");
+        icoColonneBleuBas = chargerIcone("Images/Colonne.png");*/
         icoMur = chargerIcone("Images/Mur.png");
     }
 
@@ -116,7 +122,30 @@ public class VueControleurGyromite extends JFrame implements Observer {
                 } else if (jeu.getGrille()[x][y] instanceof Mur) {
                     tabJLabel[x][y].setIcon(icoMur);
                 } else if (jeu.getGrille()[x][y] instanceof Colonne) {
-                    tabJLabel[x][y].setIcon(icoColonne);
+                	Colonne colonne = ((Colonne) jeu.getGrille()[x][y]);
+                	switch ( colonne.getType() ) {
+                	case "Centre" :
+                		if (colonne.getCouleur().equals("Rouge")) {
+                			tabJLabel[x][y].setIcon(icoColonneRougeCentre);
+                		} else {
+                			//tabJLabel[x][y].setIcon(icoColonneBleuCentre);
+                		}
+                		break;
+                	case "Haut" :
+                		if (colonne.getCouleur().equals("Rouge")) {
+                			tabJLabel[x][y].setIcon(icoColonneRougeHaut);
+                		} else {
+                			//tabJLabel[x][y].setIcon(icoColonneBleuHaut);
+                		}
+                		break;
+                	case "Bas" :
+                		if (colonne.getCouleur().equals("Rouge")) {
+                			tabJLabel[x][y].setIcon(icoColonneRougeBas);
+                		} else {
+                			//tabJLabel[x][y].setIcon(icoColonneBleuBas);
+                		}
+                		break;
+                	}
                 } else {
                     tabJLabel[x][y].setIcon(icoVide);
                 }

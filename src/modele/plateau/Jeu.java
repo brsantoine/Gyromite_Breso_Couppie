@@ -23,7 +23,7 @@ import java.util.Iterator;
 public class Jeu {
 
     public static final int SIZE_X = 10;
-    public static final int SIZE_Y = 5;
+    public static final int SIZE_Y = 6;
 
     // compteur de d√©placements horizontal et vertical (1 max par d√©faut, √† chaque pas de temps)
     private HashMap<Entite, Integer> cmptDeplH = new HashMap<Entite, Integer>();
@@ -91,9 +91,11 @@ public class Jeu {
     	File file = new File(niveau);
     	int lineNumber = 0;
     	
+    	
     	try (BufferedReader br = new BufferedReader(new FileReader(file))) {
     	    String line = "";
-    	    while ((line = br.readLine()) != null) {
+    	    
+    	    while ((line = br.readLine()) != null && line.charAt(0) != '#') {
     	    	for (int i = 0; i < line.length(); i++) {
     	    		switch(line.charAt(i)) {
     	    		case 'W' :
@@ -108,8 +110,22 @@ public class Jeu {
     	        }
     	    	lineNumber++;
     	    }
+    	    
+    	    while ((line = br.readLine()) != null && line.charAt(0) != '#') {
+    	    	String[] lineSplit = line.split(";");
+    	    	int x = Integer.parseInt(lineSplit[1]);
+    	    	int y = Integer.parseInt(lineSplit[2]);
+    	    	int yFin = Integer.parseInt(lineSplit[3]);
+    	    	
+    			addEntite(new Colonne(this, lineSplit[0], "Haut"), x, y);
+    			for (int i = y+1; i < yFin; i++) {
+    				addEntite(new Colonne(this, lineSplit[0], "Centre"), x, i);
+    			}
+    			addEntite(new Colonne(this, lineSplit[0], "Bas"), x, yFin);
+    	    	
+    	    }
     	} catch (Exception e) {
-    	    System.out.println("GENERATION MAPS : Lecture de fichier ratÈ.");
+    	    System.out.println("GENERATION MAPS : Lecture de fichier ratÈ (Niveau " + numeroNiveau + ")\n");
     	}
     }
     
