@@ -83,10 +83,6 @@ public class Jeu {
     	try (BufferedReader br = new BufferedReader(new FileReader(file))) {
     	    String line = "";
     	    
-    	    line = br.readLine();
-    	    String[] sizeLine = line.split(";");
-    	    SIZE_X = Integer.parseInt(sizeLine[0]);
-    	    SIZE_Y = Integer.parseInt(sizeLine[1]);
     	    grilleEntites = new Entite[SIZE_X][SIZE_Y];
     	    
     	    
@@ -102,6 +98,12 @@ public class Jeu {
     	    			gravite.addEntiteDynamique(hector);
     	    	    	Controle4Directions.getInstance().addEntiteDynamique(hector);
     	    			break;
+    	    		case 'C' :
+    	    			addEntite(new Corde(this), i, lineNumber);
+    	    			break;
+    	    		/*case 'D' :
+    	    			addEntite(new Dynamite(this), i, lineNumber);
+    	    			break;*/
     	    		/*case '' :
     	    			addEntite(new (this), i, lineNumber);
     	    			break;*/
@@ -113,7 +115,7 @@ public class Jeu {
     	    }
     	    
     	    if (hector == null) {
-    	    	throw new Exception("Hector non initialisï¿½ !");
+    	    	throw new Exception("Hector non initialisé !");
     	    }
     	    
     	    while ((line = br.readLine()) != null && line.charAt(0) != '#') {
