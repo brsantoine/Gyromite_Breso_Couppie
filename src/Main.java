@@ -1,5 +1,4 @@
 import VueControleur.VueControleurGyromite;
-import VueControleur.VueControleurMenu;
 import modele.plateau.Jeu;
 
 /*
@@ -13,9 +12,9 @@ public class Main {
     public static void main(String[] args) {
     	Jeu jeu = new Jeu();
     	
-    	VueControleurMenu vm = new VueControleurMenu(jeu);
-    	jeu.getOrdonnanceur().addObserver(vm);
+    	VueControleurGyromite v = new VueControleurGyromite(jeu);
+    	jeu.getOrdonnanceur().addObserver(v);
         
-    	vm.setVisible(true);
+    	v.afficherMenu();
     }
 }

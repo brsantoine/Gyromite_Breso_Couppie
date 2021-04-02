@@ -1,8 +1,12 @@
 package VueControleur;
 
+import java.awt.BorderLayout;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -10,55 +14,142 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.imageio.ImageIO;
-import javax.swing.*;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 import modele.deplacements.ColonneBleue2Direction;
 import modele.deplacements.ColonneRouge2Direction;
 import modele.deplacements.Controle4Directions;
 import modele.deplacements.Direction;
-import modele.plateau.*;
+import modele.plateau.Colonne;
+import modele.plateau.Corde;
+import modele.plateau.Dynamite;
+import modele.plateau.Heros;
+import modele.plateau.Jeu;
+import modele.plateau.Mur;
 import utils.Parameters;
 
+public class VueControleurGyromite implements Observer {
 
-/** Cette classe a deux fonctions :
- *  (1) Vue : proposer une représentation graphique de l'application (cases graphiques, etc.)
- *  (2) Controleur : écouter les évènements clavier et déclencher le traitement adapté sur le modèle (flèches direction Pacman, etc.))
- *
- */
-public class VueControleurGyromite extends JFrame implements Observer {
-    private Jeu jeu; // référence sur une classe de modèle : permet d'accéder aux données du modèle pour le rafraichissement, permet de communiquer les actions clavier (ou souris)
+	private Jeu jeu;
+	
+	// frameJeu
+	private int jeuSizeX, jeuSizeY;
+	private ImageIcon icoHero, icoVide, icoMur, icoCorde, icoDynamite, icoColonneRougeHaut, icoColonneRougeCentre, icoColonneRougeBas, icoColonneBleuHaut, icoColonneBleuCentre, icoColonneBleuBas;
+	private JLabel[][] tabJLabel;
+	
+	//
+	private JFrame frameMenu, frameJeu;
+	
+	private JPanel menuPanelBoutons;
+	private JButton menuBoutonPlay, menuBoutonRules, menuBoutonHS, menuBoutonQuit;
+	
+	public VueControleurGyromite(Jeu _jeu) {
+		jeu = _jeu;
+		jeuSizeX = jeu.SIZE_X;
+		jeuSizeY = jeu.SIZE_Y;
+		
+		////////////////////////////////////
+		///////// CREATION DU MENU /////////
+		////////////////////////////////////
+		frameMenu = new JFrame();
+		frameMenu.setTitle("Gyromite");
+		frameMenu.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frameMenu.setResizable(false);
+		frameMenu.setLocation(Parameters.HORIZONTAL_BUFFER*((Parameters.screenSize.width-Parameters.MENU_WIDTH)/40), Parameters.VERTICAL_BUFFER*2 - Parameters.TASKBAR_BUFFER);
+		frameMenu.setLayout(new BorderLayout(100, 100));
+		frameMenu.setSize(Parameters.MENU_WIDTH, Parameters.MENU_HEIGHT);
+		
+		JPanel panelTitre = new JPanel();
+		frameMenu.add(panelTitre, BorderLayout.NORTH);
+        JLabel labelTitre = new JLabel("Menu Gyromite");
+        panelTitre.add(labelTitre);
+        labelTitre.setFont(labelTitre.getFont().deriveFont(64.0f));
+        
+        menuPanelBoutons = new JPanel();
+        menuPanelBoutons.setLayout(new GridLayout(7, 1));
+        frameMenu.add(menuPanelBoutons, BorderLayout.CENTER);
+        
+        JPanel emptyPanelWest = new JPanel();
+        JPanel emptyPanelEast = new JPanel();
+        JPanel emptyPanelSouth = new JPanel();
+        frameMenu.add(emptyPanelWest, BorderLayout.WEST);
+        frameMenu.add(emptyPanelEast, BorderLayout.EAST);
+        frameMenu.add(emptyPanelSouth, BorderLayout.SOUTH);
+        
+        menuBoutonPlay = new JButton("Jouer");
+        menuBoutonRules = new JButton("R�gles");
+        menuBoutonHS = new JButton("Meilleurs scores");
+        menuBoutonQuit = new JButton("Quitter");
+        
+        menuPanelBoutons.add(menuBoutonPlay);
+        menuPanelBoutons.add(new JPanel());
+        menuPanelBoutons.add(menuBoutonRules);
+        menuPanelBoutons.add(new JPanel());
+        menuPanelBoutons.add(menuBoutonHS);
+        menuPanelBoutons.add(new JPanel());
+        menuPanelBoutons.add(menuBoutonQuit);
+        
+		////////////////////////////////////
+		////////// ACTIONS BOUTONS /////////
+		////////////////////////////////////
+        menuBoutonPlay.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                frameMenu.setVisible(false);
+                creerJeu();
+                
+                if (jeu.debutPartie()) {
+                	frameJeu.setVisible(true);
+                	jeu.start(300);
+                }
+           } 
+        });
+        
+        menuBoutonQuit.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+            	frameMenu.dispose();
+           } 
+        });
+	}
+	
+	public void afficherMenu() {
+		frameMenu.setVisible(true);
+	}
+	
+	private void creerJeu() {
+		frameJeu = new JFrame();
+        frameJeu.setTitle("Gyromite");
+        frameJeu.setSize(jeuSizeX*Parameters.IMAGE_SIZE, jeuSizeY*Parameters.IMAGE_SIZE);
+        frameJeu.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // permet de terminer l'application à la fermeture de la fenêtre
 
-    private int sizeX; // taille de la grille affichée
-    private int sizeY;
+        JComponent grilleJLabels = new JPanel(new GridLayout(jeuSizeY, jeuSizeX)); // grilleJLabels va contenir les cases graphiques et les positionner sous la forme d'une grille
 
-    // icones affichées dans la grille
-    private ImageIcon icoHero;
-    private ImageIcon icoVide;
-    private ImageIcon icoMur;
-    private ImageIcon icoCorde;
-    private ImageIcon icoColonne, icoColonneRougeHaut, icoColonneRougeCentre, icoColonneRougeBas, icoColonneBleuHaut, icoColonneBleuCentre, icoColonneBleuBas;
+        tabJLabel = new JLabel[jeuSizeX][jeuSizeY];
 
-
-    private JLabel[][] tabJLabel; // cases graphique (au moment du rafraichissement, chaque case va être associée à une icône, suivant ce qui est présent dans le modèle)
-
-
-    public VueControleurGyromite(Jeu _jeu) {
-        sizeX = _jeu.SIZE_X;
-        sizeY = _jeu.SIZE_Y;
-        jeu = _jeu;
-
+        for (int y = 0; y < jeuSizeY; y++) {
+            for (int x = 0; x < jeuSizeX; x++) {
+                JLabel jlab = new JLabel();
+                tabJLabel[x][y] = jlab; // on conserve les cases graphiques dans tabJLabel pour avoir un accès pratique à celles-ci (voir mettreAJourAffichage() )
+                grilleJLabels.add(jlab);
+            }
+        }
+        frameJeu.add(grilleJLabels);
+        
         chargerLesIcones();
-    }
-    
-    public void afficher() {
-        placerLesComposantsGraphiques();
         ajouterEcouteurClavier();
-    }
-    
-
-    private void ajouterEcouteurClavier() {
-        addKeyListener(new KeyAdapter() { // new KeyAdapter() { ... } est une instance de classe anonyme, il s'agit d'un objet qui correspond au controleur dans MVC
+	}
+	
+	private void ajouterEcouteurClavier() {
+        frameJeu.addKeyListener(new KeyAdapter() { // new KeyAdapter() { ... } est une instance de classe anonyme, il s'agit d'un objet qui correspond au controleur dans MVC
             @Override
             public void keyPressed(KeyEvent e) {
                 switch(e.getKeyCode()) {  // on regarde quelle touche a été pressée
@@ -74,10 +165,9 @@ public class VueControleurGyromite extends JFrame implements Observer {
             }
         });
     }
-
-
-    private void chargerLesIcones() {
-        icoHero = chargerIcone("Images/Pacman.png");
+	
+	private void chargerLesIcones() {
+        icoHero = chargerIcone("Images/Hector.png");
         icoVide = chargerIcone("Images/Vide.png");
         icoColonneRougeHaut = chargerIcone("Images/ColonneRougeHaut.png");
         icoColonneRougeCentre = chargerIcone("Images/ColonneRougeCentre.png");
@@ -87,10 +177,10 @@ public class VueControleurGyromite extends JFrame implements Observer {
         icoColonneBleuBas = chargerIcone("Images/ColonneBleuBas.png");
         icoMur = chargerIcone("Images/Mur.png");
         icoCorde = chargerIcone("Images/Corde.png");
-        //icoDynamite = chargerIcone("Images/Dynamite.png");
+        icoDynamite = chargerIcone("Images/Dynamite.png");
     }
-
-    private ImageIcon chargerIcone(String urlIcone) {
+	
+	private ImageIcon chargerIcone(String urlIcone) {
         BufferedImage image = null;
 
         try {
@@ -102,93 +192,69 @@ public class VueControleurGyromite extends JFrame implements Observer {
 
         return new ImageIcon(image);
     }
+	
+	private void mettreAJourAffichage() {
 
-    private void placerLesComposantsGraphiques() {
-        setTitle("Gyromite");
-        setSize(sizeX*Parameters.IMAGE_SIZE, sizeY*Parameters.IMAGE_SIZE);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // permet de terminer l'application à la fermeture de la fenêtre
-
-        JComponent grilleJLabels = new JPanel(new GridLayout(sizeY, sizeX)); // grilleJLabels va contenir les cases graphiques et les positionner sous la forme d'une grille
-
-        tabJLabel = new JLabel[sizeX][sizeY];
-
-        for (int y = 0; y < sizeY; y++) {
-            for (int x = 0; x < sizeX; x++) {
-                JLabel jlab = new JLabel();
-                tabJLabel[x][y] = jlab; // on conserve les cases graphiques dans tabJLabel pour avoir un accès pratique à celles-ci (voir mettreAJourAffichage() )
-                grilleJLabels.add(jlab);
-            }
-        }
-        add(grilleJLabels);
-    }
-
-    
-    /**
-     * Il y a une grille du côté du modèle ( jeu.getGrille() ) et une grille du côté de la vue (tabJLabel)
-     */
-    private void mettreAJourAffichage() {
-
-        for (int x = 0; x < sizeX; x++) {
-            for (int y = 0; y < sizeY; y++) {
-                if (jeu.getGrille()[x][y] instanceof Heros) { // si la grille du modèle contient un Pacman, on associe l'icône Pacman du côté de la vue
-                    // System.out.println("Héros !");
-                    tabJLabel[x][y].setIcon(icoHero);
-                } else if (jeu.getGrille()[x][y] instanceof Mur) {
+        for (int x = 0; x < jeuSizeX; x++) {
+            for (int y = 0; y < jeuSizeY; y++) {
+                if (jeu.getGrille()[x][y] instanceof Mur) {
                     tabJLabel[x][y].setIcon(icoMur);
                 } else if (jeu.getGrille()[x][y] instanceof Colonne) {
-                	Colonne colonne = ((Colonne) jeu.getGrille()[x][y]);
-                	switch ( colonne.getType() ) {
-                	case "Centre" :
-                		if (colonne.getCouleur().equals("Rouge")) {
-                			tabJLabel[x][y].setIcon(icoColonneRougeCentre);
-                		} else {
-                			tabJLabel[x][y].setIcon(icoColonneBleuCentre);
-                		}
-                		break;
-                	case "Haut" :
-                		if (colonne.getCouleur().equals("Rouge")) {
-                			tabJLabel[x][y].setIcon(icoColonneRougeHaut);
-                		} else {
-                			tabJLabel[x][y].setIcon(icoColonneBleuHaut);
-                		}
-                		break;
-                	case "Bas" :
-                		if (colonne.getCouleur().equals("Rouge")) {
-                			tabJLabel[x][y].setIcon(icoColonneRougeBas);
-                		} else {
-                			tabJLabel[x][y].setIcon(icoColonneBleuBas);
-                		}
-                		break;
-                	}
+                    Colonne colonne = ((Colonne) jeu.getGrille()[x][y]);
+                    switch ( colonne.getType() ) {
+                    case "Centre" :
+                        if (colonne.getCouleur().equals("Rouge")) {
+                            tabJLabel[x][y].setIcon(icoColonneRougeCentre);
+                        } else {
+                            tabJLabel[x][y].setIcon(icoColonneBleuCentre);
+                        }
+                        break;
+                    case "Haut" :
+                        if (colonne.getCouleur().equals("Rouge")) {
+                            tabJLabel[x][y].setIcon(icoColonneRougeHaut);
+                        } else {
+                            tabJLabel[x][y].setIcon(icoColonneBleuHaut);
+                        }
+                        break;
+                    case "Bas" :
+                        if (colonne.getCouleur().equals("Rouge")) {
+                            tabJLabel[x][y].setIcon(icoColonneRougeBas);
+                        } else {
+                            tabJLabel[x][y].setIcon(icoColonneBleuBas);
+                        }
+                        break;
+                    }
                 } else if (jeu.getGrille()[x][y] instanceof Corde) {
                     tabJLabel[x][y].setIcon(icoCorde);
                 } else if(jeu.getGrille()[x][y] instanceof Dynamite) {
-                    //tabJLabel[x][y].setIcon(icoDynamite);
+                    tabJLabel[x][y].setIcon(icoDynamite);
                 } else {
                     tabJLabel[x][y].setIcon(icoVide);
+                }
+                if (jeu.getGrilleDynamique()[x][y] instanceof Heros) {
+                    tabJLabel[x][y].setIcon(icoHero);
                 }
             }
         }
     }
+	
+	@Override
+	public void update(Observable arg0, Object arg1) {
+		SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+            	if (arg1 instanceof Integer) {
+            		if ((int) arg1 == Parameters.RETURN_TO_MENU) {
+            			frameJeu.setVisible(false);
+            			frameJeu.dispose();
+            			frameMenu.setVisible(true);
+            		}
+            	} else {
+            		mettreAJourAffichage();
+            	}
+            }
+        }); 
+		
+	}
 
-    @Override
-    public void update(Observable o, Object arg) {
-        
-        SwingUtilities.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                    	if (arg instanceof Integer) {
-                    		if ((int) arg == Parameters.RETURN_TO_MENU) {
-                    			setVisible(false);
-                    			dispose();
-                    		} else {
-                    			mettreAJourAffichage();
-                    		}
-                    	} else {
-                    		mettreAJourAffichage();
-                    	}
-                    }
-                }); 
-
-    }
 }

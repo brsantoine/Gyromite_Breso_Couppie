@@ -22,5 +22,5 @@ public abstract class Parameters {
     // LEVEL
     public static final Integer RETURN_TO_MENU = 0;
     public static final Integer NEXT_LEVEL = 1;
-    public static final Integer NUMBER_OF_LEVELS = 2;
+    public static final Integer NUMBER_OF_LEVELS = 1;
 }

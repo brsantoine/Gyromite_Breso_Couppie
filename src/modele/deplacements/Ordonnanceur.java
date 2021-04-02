@@ -39,14 +39,11 @@ public class Ordonnanceur extends Observable implements Runnable {
 
         while(true) {
         	if (jeu.niveauFinit()) {
-        		if (jeu.niveauSuivant()) {
-        			setChanged();
-        			notifyObservers(new Integer(Parameters.NEXT_LEVEL));
-        		} else {
+        		if (!jeu.niveauSuivant()) {
         			setChanged();
                 	notifyObservers(new Integer(Parameters.RETURN_TO_MENU));
+                	break;
         		}
-        		
             }
         	
             jeu.resetCmptDepl();

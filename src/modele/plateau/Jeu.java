@@ -20,7 +20,7 @@ import java.io.FileReader;
 import java.util.HashMap;
 import java.util.Iterator;
 
-/** Actuellement, cette classe gère les postions
+/** Actuellement, cette classe garde les postions
  * (ajouter conditions de victoire, chargement du plateau, etc.)
  */
 
@@ -38,7 +38,7 @@ public class Jeu {
     
     private HashMap<Entite, Point> map = new  HashMap<Entite, Point>(); // permet de récupérer la position d'une entité à partir de sa référence
     private Entite[][] grilleEntites = new Entite[SIZE_X][SIZE_Y]; // permet de récupérer une entité à partir de ses coordonnées
-    private boolean pCorde = false; // permet de mémoriser l'entité sur laquelle est passé le héros, utile que pour les Cordes
+    private Entite[][] grilleEntitesDynamique = new Entite[SIZE_X][SIZE_Y]; // permet de récupérer une entité à partir de ses coordonnées
 
     private Ordonnanceur ordonnanceur = new Ordonnanceur(this);
 
@@ -47,6 +47,9 @@ public class Jeu {
     public Jeu() {
     	initialiserOrdonnanceur();
     	niveauCourant = 0;
+        hector = new Heros(this);
+        gravite.addEntiteDynamique(hector);
+        Controle4Directions.getInstance().addEntiteDynamique(hector);
     }
 
     public void resetCmptDepl() {
@@ -60,6 +63,9 @@ public class Jeu {
     
     public Entite[][] getGrille() {
         return grilleEntites;
+    }
+    public Entite[][] getGrilleDynamique() {
+        return grilleEntitesDynamique;
     }
     
     public Heros getHector() {
@@ -82,9 +88,13 @@ public class Jeu {
     	
     	try (BufferedReader br = new BufferedReader(new FileReader(file))) {
     	    String line = "";
-    	    
-    	    grilleEntites = new Entite[SIZE_X][SIZE_Y];
-    	    
+
+            for(int i=0; i< SIZE_X; i++) {
+                for (int j=0; j< SIZE_Y; j++) {
+                    this.grilleEntites[i][j] = null;
+                    this.grilleEntitesDynamique[i][j] = null;
+                }
+            }
     	    
     	    while ((line = br.readLine()) != null && line.charAt(0) != '#') {
     	    	for (int i = 0; i < line.length(); i++) {
@@ -93,17 +103,14 @@ public class Jeu {
     	    			addEntite(new Mur(this), i, lineNumber);
     	    			break;
     	    		case 'H' :
-    	    			hector = new Heros(this);
-    	    			addEntite(hector, i, lineNumber);
-    	    			gravite.addEntiteDynamique(hector);
-    	    	    	Controle4Directions.getInstance().addEntiteDynamique(hector);
+    	    			addEntiteDynamique(hector, i, lineNumber);
     	    			break;
     	    		case 'C' :
     	    			addEntite(new Corde(this), i, lineNumber);
     	    			break;
-    	    		/*case 'D' :
+    	    		case 'D' :
     	    			addEntite(new Dynamite(this), i, lineNumber);
-    	    			break;*/
+    	    			break;
     	    		/*case '' :
     	    			addEntite(new (this), i, lineNumber);
     	    			break;*/
@@ -160,6 +167,11 @@ public class Jeu {
         grilleEntites[x][y] = e;
         map.put(e, new Point(x, y));
     }
+
+    private void addEntiteDynamique(Entite e, int x, int y) {
+        grilleEntitesDynamique[x][y] = e;
+        map.put(e, new Point(x, y));
+    }
     
     /** Permet par exemple a une entité  de percevoir sont environnement proche et de définir sa stratégie de déplacement
      *
@@ -176,7 +188,6 @@ public class Jeu {
         boolean retour = false;
         
         Point pCourant = map.get(e);
-        
         Point pCible = calculerPointCible(pCourant, d);
         
         if (contenuDansGrille(pCible) && objetALaPosition(pCible) == null || grilleEntites[pCible.x][pCible.y].peutPermettreDeMonterDescendre() || grilleEntites[pCible.x][pCible.y].peutEtreRecuperer()) { // a adapter (collisions murs, etc.)
@@ -201,14 +212,8 @@ public class Jeu {
         }
 
         if (retour) {
-            boolean ptemp;
-            if(objetALaPosition(pCible) instanceof Corde) {
-                ptemp = true;
-            } else {
-                ptemp = false;
-            }
             deplacerEntite(pCourant, pCible, e);
-            pCorde = ptemp;
+            recupDynamite(pCible);
         }
 
         return retour;
@@ -230,17 +235,14 @@ public class Jeu {
     }
     
     private void deplacerEntite(Point pCourant, Point pCible, Entite e) {
-        if(this.pCorde) {
-            grilleEntites[pCourant.x][pCourant.y] = new Corde(this);
-        } else {
-            grilleEntites[pCourant.x][pCourant.y] = null;
-        }
-        grilleEntites[pCible.x][pCible.y] = e;
+        grilleEntitesDynamique[pCourant.x][pCourant.y] = null;
+        grilleEntitesDynamique[pCible.x][pCible.y] = e;
         map.put(e, pCible);
     }
     
     /** Indique si p est contenu dans la grille
      */
+
     private boolean contenuDansGrille(Point p) {
         return p.x >= 0 && p.x < SIZE_X && p.y >= 0 && p.y < SIZE_Y;
     }
@@ -254,7 +256,16 @@ public class Jeu {
         
         return retour;
     }
-    
+
+    public boolean debutPartie() {
+        niveauCourant = 1;
+        if (niveauCourant > Parameters.NUMBER_OF_LEVELS) {
+            return false;
+        }
+        initialisationDuMonde(niveauCourant);
+        return true;
+    }
+
     public boolean niveauSuivant() {
     	niveauCourant++;
     	if (niveauCourant > Parameters.NUMBER_OF_LEVELS) {
@@ -265,13 +276,22 @@ public class Jeu {
     }
     
     public boolean niveauFinit() {
-    	/*Point p = map.get(hector);
-    	return (p.x == 2 && p.y == 8) || (p.x == 3 && p.y == 3);*/
-    	return false;
-    	
+
+        for(int i=0; i< SIZE_X; i++) {
+            for (int j=0; j< SIZE_Y; j++) {
+                if (grilleEntites[i][j] instanceof Dynamite)
+                    return false;
+            }
+        }
+        return true;
     }
 
     public Ordonnanceur getOrdonnanceur() {
         return ordonnanceur;
+    }
+
+    private void recupDynamite(Point pCourant) {
+        if (grilleEntites[pCourant.x][pCourant.y] instanceof Dynamite)
+            grilleEntites[pCourant.x][pCourant.y] = null;
     }
 }
