@@ -1,6 +1,7 @@
 package modele.deplacements;
 
 import modele.plateau.Jeu;
+import utils.Parameters;
 
 import java.util.ArrayList;
 import java.util.Observable;
@@ -23,12 +24,31 @@ public class Ordonnanceur extends Observable implements Runnable {
         pause = _pause;
         new Thread(this).start();
     }
+    
+    public void stop() {
+    	currentThread().interrupt();
+    }
+    
+    public void reprise() {
+    	currentThread().run();
+    }
 
     @Override
     public void run() {
         boolean update = false;
 
         while(true) {
+        	if (jeu.niveauFinit()) {
+        		if (jeu.niveauSuivant()) {
+        			setChanged();
+        			notifyObservers(new Integer(Parameters.NEXT_LEVEL));
+        		} else {
+        			setChanged();
+                	notifyObservers(new Integer(Parameters.RETURN_TO_MENU));
+        		}
+        		
+            }
+        	
             jeu.resetCmptDepl();
             for (RealisateurDeDeplacement d : lstDeplacements) {
                 if (d.realiserDeplacement())
@@ -36,6 +56,8 @@ public class Ordonnanceur extends Observable implements Runnable {
             }
 
             Controle4Directions.getInstance().resetDirection();
+            ColonneRouge2Direction.getInstance().resetDirection();
+            ColonneBleue2Direction.getInstance().resetDirection();
 
             if (update) {
                 setChanged();

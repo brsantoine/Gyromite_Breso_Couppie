@@ -13,9 +13,12 @@ import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 
+import modele.deplacements.ColonneBleue2Direction;
+import modele.deplacements.ColonneRouge2Direction;
 import modele.deplacements.Controle4Directions;
 import modele.deplacements.Direction;
 import modele.plateau.*;
+import utils.Parameters;
 
 
 /** Cette classe a deux fonctions :
@@ -26,16 +29,15 @@ import modele.plateau.*;
 public class VueControleurGyromite extends JFrame implements Observer {
     private Jeu jeu; // référence sur une classe de modèle : permet d'accéder aux données du modèle pour le rafraichissement, permet de communiquer les actions clavier (ou souris)
 
-    private int sizeX; // taille de la grille affichée
-    private int sizeY;
+    private int sizeX = 20; // taille de la grille affichée
+    private int sizeY = 10;
 
     // icones affichées dans la grille
     private ImageIcon icoHero;
     private ImageIcon icoVide;
     private ImageIcon icoMur;
-    private ImageIcon icoColonne;
-    private ImageIcon icoCorde;
-    //private ImageIcon icoDynamite;
+    private ImageIcon icoColonne, icoColonneRougeHaut, icoColonneRougeCentre, icoColonneRougeBas, icoColonneBleuHaut, icoColonneBleuCentre, icoColonneBleuBas;
+
 
     private JLabel[][] tabJLabel; // cases graphique (au moment du rafraichissement, chaque case va être associée à une icône, suivant ce qui est présent dans le modèle)
 
@@ -46,9 +48,13 @@ public class VueControleurGyromite extends JFrame implements Observer {
         jeu = _jeu;
 
         chargerLesIcones();
+    }
+    
+    public void afficher() {
         placerLesComposantsGraphiques();
         ajouterEcouteurClavier();
     }
+    
 
     private void ajouterEcouteurClavier() {
         addKeyListener(new KeyAdapter() { // new KeyAdapter() { ... } est une instance de classe anonyme, il s'agit d'un objet qui correspond au controleur dans MVC
@@ -59,6 +65,10 @@ public class VueControleurGyromite extends JFrame implements Observer {
                     case KeyEvent.VK_RIGHT : Controle4Directions.getInstance().setDirectionCourante(Direction.droite); break;
                     case KeyEvent.VK_DOWN : Controle4Directions.getInstance().setDirectionCourante(Direction.bas); break;
                     case KeyEvent.VK_UP : Controle4Directions.getInstance().setDirectionCourante(Direction.haut); break;
+                    case KeyEvent.VK_R : ColonneRouge2Direction.getInstance().setDirectionCourante(Direction.haut); break;
+                    case KeyEvent.VK_F : ColonneRouge2Direction.getInstance().setDirectionCourante(Direction.bas); break;
+                    case KeyEvent.VK_Y : ColonneBleue2Direction.getInstance().setDirectionCourante(Direction.haut); break;
+                    case KeyEvent.VK_H : ColonneBleue2Direction.getInstance().setDirectionCourante(Direction.bas); break;
                 }
             }
         });
@@ -68,7 +78,12 @@ public class VueControleurGyromite extends JFrame implements Observer {
     private void chargerLesIcones() {
         icoHero = chargerIcone("Images/Pacman.png");
         icoVide = chargerIcone("Images/Vide.png");
-        icoColonne = chargerIcone("Images/Colonne.png");
+        icoColonneRougeHaut = chargerIcone("Images/ColonneRougeHaut.png");
+        icoColonneRougeCentre = chargerIcone("Images/ColonneRougeCentre.png");
+        icoColonneRougeBas = chargerIcone("Images/ColonneRougeBas.png");
+        icoColonneBleuHaut = chargerIcone("Images/ColonneBleuHaut.png");
+        icoColonneBleuCentre = chargerIcone("Images/ColonneBleuCentre.png");
+        icoColonneBleuBas = chargerIcone("Images/ColonneBleuBas.png");
         icoMur = chargerIcone("Images/Mur.png");
         icoCorde = chargerIcone("Images/Corde.png");
         //icoDynamite = chargerIcone("Images/Dynamite.png");
@@ -89,7 +104,7 @@ public class VueControleurGyromite extends JFrame implements Observer {
 
     private void placerLesComposantsGraphiques() {
         setTitle("Gyromite");
-        setSize(1300, 650);
+        setSize(sizeX*Parameters.IMAGE_SIZE, sizeY*Parameters.IMAGE_SIZE);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // permet de terminer l'application à la fermeture de la fenêtre
 
         JComponent grilleJLabels = new JPanel(new GridLayout(sizeY, sizeX)); // grilleJLabels va contenir les cases graphiques et les positionner sous la forme d'une grille
@@ -120,7 +135,30 @@ public class VueControleurGyromite extends JFrame implements Observer {
                 } else if (jeu.getGrille()[x][y] instanceof Mur) {
                     tabJLabel[x][y].setIcon(icoMur);
                 } else if (jeu.getGrille()[x][y] instanceof Colonne) {
-                    tabJLabel[x][y].setIcon(icoColonne);
+                	Colonne colonne = ((Colonne) jeu.getGrille()[x][y]);
+                	switch ( colonne.getType() ) {
+                	case "Centre" :
+                		if (colonne.getCouleur().equals("Rouge")) {
+                			tabJLabel[x][y].setIcon(icoColonneRougeCentre);
+                		} else {
+                			tabJLabel[x][y].setIcon(icoColonneBleuCentre);
+                		}
+                		break;
+                	case "Haut" :
+                		if (colonne.getCouleur().equals("Rouge")) {
+                			tabJLabel[x][y].setIcon(icoColonneRougeHaut);
+                		} else {
+                			tabJLabel[x][y].setIcon(icoColonneBleuHaut);
+                		}
+                		break;
+                	case "Bas" :
+                		if (colonne.getCouleur().equals("Rouge")) {
+                			tabJLabel[x][y].setIcon(icoColonneRougeBas);
+                		} else {
+                			tabJLabel[x][y].setIcon(icoColonneBleuBas);
+                		}
+                		break;
+                	}
                 } else if (jeu.getGrille()[x][y] instanceof Corde) {
                     tabJLabel[x][y].setIcon(icoCorde);
                 } else if(jeu.getGrille()[x][y] instanceof Dynamite) {
@@ -134,15 +172,20 @@ public class VueControleurGyromite extends JFrame implements Observer {
 
     @Override
     public void update(Observable o, Object arg) {
-        mettreAJourAffichage();
-        /*
+        
         SwingUtilities.invokeLater(new Runnable() {
                     @Override
                     public void run() {
-                        mettreAJourAffichage();
+                    	if (arg instanceof Integer) {
+                    		if ((int) arg == Parameters.RETURN_TO_MENU) {
+                    			setVisible(false);
+                    			dispose();
+                    		}
+                    	} else {
+                    		mettreAJourAffichage();
+                    	}
                     }
                 }); 
-        */
 
     }
 }
