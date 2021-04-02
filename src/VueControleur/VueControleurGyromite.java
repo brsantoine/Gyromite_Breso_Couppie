@@ -13,9 +13,12 @@ import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 
+import modele.deplacements.ColonneBleue2Direction;
+import modele.deplacements.ColonneRouge2Direction;
 import modele.deplacements.Controle4Directions;
 import modele.deplacements.Direction;
 import modele.plateau.*;
+import utils.Parameters;
 
 
 /** Cette classe a deux fonctions :
@@ -39,14 +42,18 @@ public class VueControleurGyromite extends JFrame implements Observer {
 
 
     public VueControleurGyromite(Jeu _jeu) {
-        sizeX = _jeu.SIZE_X;
-        sizeY = _jeu.SIZE_Y;
         jeu = _jeu;
 
         chargerLesIcones();
+    }
+    
+    public void afficher() {
+    	sizeX = jeu.SIZE_X;
+        sizeY = jeu.SIZE_Y;
         placerLesComposantsGraphiques();
         ajouterEcouteurClavier();
     }
+    
 
     private void ajouterEcouteurClavier() {
         addKeyListener(new KeyAdapter() { // new KeyAdapter() { ... } est une instance de classe anonyme, il s'agit d'un objet qui correspond au controleur dans MVC
@@ -57,6 +64,10 @@ public class VueControleurGyromite extends JFrame implements Observer {
                     case KeyEvent.VK_RIGHT : Controle4Directions.getInstance().setDirectionCourante(Direction.droite); break;
                     case KeyEvent.VK_DOWN : Controle4Directions.getInstance().setDirectionCourante(Direction.bas); break;
                     case KeyEvent.VK_UP : Controle4Directions.getInstance().setDirectionCourante(Direction.haut); break;
+                    case KeyEvent.VK_R : ColonneRouge2Direction.getInstance().setDirectionCourante(Direction.haut); break;
+                    case KeyEvent.VK_F : ColonneRouge2Direction.getInstance().setDirectionCourante(Direction.bas); break;
+                    case KeyEvent.VK_Y : ColonneBleue2Direction.getInstance().setDirectionCourante(Direction.haut); break;
+                    case KeyEvent.VK_H : ColonneBleue2Direction.getInstance().setDirectionCourante(Direction.bas); break;
                 }
             }
         });
@@ -90,7 +101,7 @@ public class VueControleurGyromite extends JFrame implements Observer {
 
     private void placerLesComposantsGraphiques() {
         setTitle("Gyromite");
-        setSize(200, 140);
+        setSize(sizeX*Parameters.IMAGE_SIZE, sizeY*Parameters.IMAGE_SIZE);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // permet de terminer l'application à la fermeture de la fenêtre
 
         JComponent grilleJLabels = new JPanel(new GridLayout(sizeY, sizeX)); // grilleJLabels va contenir les cases graphiques et les positionner sous la forme d'une grille
@@ -154,15 +165,20 @@ public class VueControleurGyromite extends JFrame implements Observer {
 
     @Override
     public void update(Observable o, Object arg) {
-        mettreAJourAffichage();
-        /*
+        
         SwingUtilities.invokeLater(new Runnable() {
                     @Override
                     public void run() {
-                        mettreAJourAffichage();
+                    	if (arg instanceof Integer) {
+                    		if ((int) arg == Parameters.RETURN_TO_MENU) {
+                    			setVisible(false);
+                    			dispose();
+                    		}
+                    	} else {
+                    		mettreAJourAffichage();
+                    	}
                     }
                 }); 
-        */
 
     }
 }
