@@ -1,7 +1,6 @@
 package modele.deplacements;
 
 import modele.plateau.EntiteDynamique;
-
 import java.util.ArrayList;
 
 /**

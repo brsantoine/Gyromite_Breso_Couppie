@@ -34,12 +34,14 @@ public class VueControleurGyromite extends JFrame implements Observer {
     private ImageIcon icoVide;
     private ImageIcon icoMur;
     private ImageIcon icoColonne;
+    private ImageIcon icoCorde;
+    //private ImageIcon icoDynamite;
 
     private JLabel[][] tabJLabel; // cases graphique (au moment du rafraichissement, chaque case va être associée à une icône, suivant ce qui est présent dans le modèle)
 
 
     public VueControleurGyromite(Jeu _jeu) {
-        sizeX = _jeu.SIZE_X;
+        sizeX = jeu.SIZE_X;
         sizeY = _jeu.SIZE_Y;
         jeu = _jeu;
 
@@ -68,6 +70,8 @@ public class VueControleurGyromite extends JFrame implements Observer {
         icoVide = chargerIcone("Images/Vide.png");
         icoColonne = chargerIcone("Images/Colonne.png");
         icoMur = chargerIcone("Images/Mur.png");
+        icoCorde = chargerIcone("Images/Corde.png");
+        //icoDynamite = chargerIcone("Images/Dynamite.png");
     }
 
     private ImageIcon chargerIcone(String urlIcone) {
@@ -85,7 +89,7 @@ public class VueControleurGyromite extends JFrame implements Observer {
 
     private void placerLesComposantsGraphiques() {
         setTitle("Gyromite");
-        setSize(400, 250);
+        setSize(1300, 650);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // permet de terminer l'application à la fermeture de la fenêtre
 
         JComponent grilleJLabels = new JPanel(new GridLayout(sizeY, sizeX)); // grilleJLabels va contenir les cases graphiques et les positionner sous la forme d'une grille
@@ -117,6 +121,10 @@ public class VueControleurGyromite extends JFrame implements Observer {
                     tabJLabel[x][y].setIcon(icoMur);
                 } else if (jeu.getGrille()[x][y] instanceof Colonne) {
                     tabJLabel[x][y].setIcon(icoColonne);
+                } else if (jeu.getGrille()[x][y] instanceof Corde) {
+                    tabJLabel[x][y].setIcon(icoCorde);
+                } else if(jeu.getGrille()[x][y] instanceof Dynamite) {
+                    //tabJLabel[x][y].setIcon(icoDynamite);
                 } else {
                     tabJLabel[x][y].setIcon(icoVide);
                 }
