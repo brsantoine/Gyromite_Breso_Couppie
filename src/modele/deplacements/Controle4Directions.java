@@ -42,6 +42,15 @@ public class Controle4Directions extends RealisateurDeDeplacement {
                                 ret = true;
                         }
                         break;
+
+                    case bas:
+                        // on ne peut desendre que sur une liane
+                        eBas = e.regarderDansLaDirection(Direction.bas);
+                        if (eBas != null && eBas.peutPermettreDeMonterDescendre()) {
+                            if (e.avancerDirectionChoisie(Direction.bas))
+                                ret = true;
+                        }
+                        break;
                 }
         }
 
