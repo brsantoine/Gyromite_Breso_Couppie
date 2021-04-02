@@ -23,6 +23,7 @@ import java.util.Iterator;
 /** Actuellement, cette classe gère les postions
  * (ajouter conditions de victoire, chargement du plateau, etc.)
  */
+
 public class Jeu {
 
     public int SIZE_X;
@@ -36,7 +37,8 @@ public class Jeu {
     private Gravite gravite;
     
     private HashMap<Entite, Point> map = new  HashMap<Entite, Point>(); // permet de récupérer la position d'une entité à partir de sa référence
-    private Entite[][] grilleEntites; // permet de récupérer une entité à partir de ses coordonnées
+    private Entite[][] grilleEntites = new Entite[SIZE_X][SIZE_Y]; // permet de récupérer une entité à partir de ses coordonnées
+    private boolean pCorde = false; // permet de mémoriser l'entité sur laquelle est passé le héros, utile que pour les Cordes
 
     private Ordonnanceur ordonnanceur = new Ordonnanceur(this);
 
@@ -63,7 +65,7 @@ public class Jeu {
     public Heros getHector() {
         return hector;
     }
-    
+  
     public void initialiserOrdonnanceur() {
     	gravite = new Gravite();
     	
@@ -113,7 +115,7 @@ public class Jeu {
     	    }
     	    
     	    if (hector == null) {
-    	    	throw new Exception("Hector non initialis� !");
+    	    	throw new Exception("Hector non initialis� !");
     	    }
     	    
     	    while ((line = br.readLine()) != null && line.charAt(0) != '#') {
@@ -149,7 +151,7 @@ public class Jeu {
     	    	
     	    }
     	} catch (Exception e) {
-    	    System.out.println("GENERATION MAPS : Lecture de fichier rat� (Niveau " + numeroNiveau + ")\n");
+    	    System.out.println("GENERATION MAPS : Lecture de fichier rat� (Niveau " + numeroNiveau + ")\n");
     	    System.out.println(e.getMessage());
     	}
     }
@@ -177,8 +179,8 @@ public class Jeu {
         
         Point pCible = calculerPointCible(pCourant, d);
         
-        if (contenuDansGrille(pCible) && objetALaPosition(pCible) == null) { // a adapter (collisions murs, etc.)
-            // compter le déplacement : 1 deplacement horizontal et vertical max par pas de temps par entité
+        if (contenuDansGrille(pCible) && objetALaPosition(pCible) == null || grilleEntites[pCible.x][pCible.y].peutPermettreDeMonterDescendre() || grilleEntites[pCible.x][pCible.y].peutEtreRecuperer()) { // a adapter (collisions murs, etc.)
+            // compter le déplacement : 1 deplacement horizontal et vertical max par pas de temps par entite
             switch (d) {
                 case bas:
                 case haut:
@@ -193,14 +195,20 @@ public class Jeu {
                     if (cmptDeplH.get(e) == null) {
                         cmptDeplH.put(e, 1);
                         retour = true;
-
                     }
                     break;
             }
         }
 
         if (retour) {
+            boolean ptemp;
+            if(objetALaPosition(pCible) instanceof Corde) {
+                ptemp = true;
+            } else {
+                ptemp = false;
+            }
             deplacerEntite(pCourant, pCible, e);
+            pCorde = ptemp;
         }
 
         return retour;
@@ -222,7 +230,11 @@ public class Jeu {
     }
     
     private void deplacerEntite(Point pCourant, Point pCible, Entite e) {
-        grilleEntites[pCourant.x][pCourant.y] = null;
+        if(this.pCorde) {
+            grilleEntites[pCourant.x][pCourant.y] = new Corde(this);
+        } else {
+            grilleEntites[pCourant.x][pCourant.y] = null;
+        }
         grilleEntites[pCible.x][pCible.y] = e;
         map.put(e, pCible);
     }
@@ -237,7 +249,7 @@ public class Jeu {
         Entite retour = null;
         
         if (contenuDansGrille(p)) {
-            retour = grilleEntites[p.x][p.y];
+                retour = grilleEntites[p.x][p.y];
         }
         
         return retour;

@@ -29,8 +29,8 @@ import utils.Parameters;
 public class VueControleurGyromite extends JFrame implements Observer {
     private Jeu jeu; // référence sur une classe de modèle : permet d'accéder aux données du modèle pour le rafraichissement, permet de communiquer les actions clavier (ou souris)
 
-    private int sizeX; // taille de la grille affichée
-    private int sizeY;
+    private int sizeX = 20; // taille de la grille affichée
+    private int sizeY = 10;
 
     // icones affichées dans la grille
     private ImageIcon icoHero;
@@ -38,18 +38,19 @@ public class VueControleurGyromite extends JFrame implements Observer {
     private ImageIcon icoMur;
     private ImageIcon icoColonne, icoColonneRougeHaut, icoColonneRougeCentre, icoColonneRougeBas, icoColonneBleuHaut, icoColonneBleuCentre, icoColonneBleuBas;
 
+
     private JLabel[][] tabJLabel; // cases graphique (au moment du rafraichissement, chaque case va être associée à une icône, suivant ce qui est présent dans le modèle)
 
 
     public VueControleurGyromite(Jeu _jeu) {
+        sizeX = jeu.SIZE_X;
+        sizeY = _jeu.SIZE_Y;
         jeu = _jeu;
 
         chargerLesIcones();
     }
     
     public void afficher() {
-    	sizeX = jeu.SIZE_X;
-        sizeY = jeu.SIZE_Y;
         placerLesComposantsGraphiques();
         ajouterEcouteurClavier();
     }
@@ -84,6 +85,8 @@ public class VueControleurGyromite extends JFrame implements Observer {
         icoColonneBleuCentre = chargerIcone("Images/ColonneBleuCentre.png");
         icoColonneBleuBas = chargerIcone("Images/ColonneBleuBas.png");
         icoMur = chargerIcone("Images/Mur.png");
+        icoCorde = chargerIcone("Images/Corde.png");
+        //icoDynamite = chargerIcone("Images/Dynamite.png");
     }
 
     private ImageIcon chargerIcone(String urlIcone) {
@@ -156,6 +159,10 @@ public class VueControleurGyromite extends JFrame implements Observer {
                 		}
                 		break;
                 	}
+                } else if (jeu.getGrille()[x][y] instanceof Corde) {
+                    tabJLabel[x][y].setIcon(icoCorde);
+                } else if(jeu.getGrille()[x][y] instanceof Dynamite) {
+                    //tabJLabel[x][y].setIcon(icoDynamite);
                 } else {
                     tabJLabel[x][y].setIcon(icoVide);
                 }
