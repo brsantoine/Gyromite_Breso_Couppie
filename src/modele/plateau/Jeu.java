@@ -265,8 +265,9 @@ public class Jeu {
     }
     
     public boolean niveauFinit() {
-    	Point p = map.get(hector);
-    	return (p.x == 2 && p.y == 8) || (p.x == 3 && p.y == 3);
+    	/*Point p = map.get(hector);
+    	return (p.x == 2 && p.y == 8) || (p.x == 3 && p.y == 3);*/
+    	return false;
     	
     }
 

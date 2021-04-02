@@ -12,7 +12,9 @@ public class Colonne extends EntiteDynamique {
     public boolean peutEtreEcrase() { return false; }
     public boolean peutServirDeSupport() { return true; }
     public boolean peutPermettreDeMonterDescendre() { return false; };
+    public boolean peutEtreRecuperer(){return false;};
+    public boolean peutMonterDescendre() { return true; };
+    
     public String getCouleur() { return couleur; }
     public String getType() { return type; }
-    public boolean peutEtreRecuperer(){return false;};
 }
