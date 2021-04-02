@@ -26,8 +26,8 @@ import java.util.Iterator;
 
 public class Jeu {
 
-    public int SIZE_X;
-    public int SIZE_Y;
+    public int SIZE_X = 20;
+    public int SIZE_Y = 10;
 
     // compteur de déplacements horizontal et vertical (1 max par défaut, à chaque pas de temps)
     private HashMap<Entite, Integer> cmptDeplH = new HashMap<Entite, Integer>();
@@ -76,8 +76,6 @@ public class Jeu {
     }
     
     private void initialisationDuMonde(int numeroNiveau) {
-    	
-    	
     	String niveau = "Maps/niveau" + numeroNiveau + ".map";
     	File file = new File(niveau);
     	int lineNumber = 0;

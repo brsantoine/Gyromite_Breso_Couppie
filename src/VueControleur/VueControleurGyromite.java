@@ -29,13 +29,14 @@ import utils.Parameters;
 public class VueControleurGyromite extends JFrame implements Observer {
     private Jeu jeu; // référence sur une classe de modèle : permet d'accéder aux données du modèle pour le rafraichissement, permet de communiquer les actions clavier (ou souris)
 
-    private int sizeX = 20; // taille de la grille affichée
-    private int sizeY = 10;
+    private int sizeX; // taille de la grille affichée
+    private int sizeY;
 
     // icones affichées dans la grille
     private ImageIcon icoHero;
     private ImageIcon icoVide;
     private ImageIcon icoMur;
+    private ImageIcon icoCorde;
     private ImageIcon icoColonne, icoColonneRougeHaut, icoColonneRougeCentre, icoColonneRougeBas, icoColonneBleuHaut, icoColonneBleuCentre, icoColonneBleuBas;
 
 
@@ -43,7 +44,7 @@ public class VueControleurGyromite extends JFrame implements Observer {
 
 
     public VueControleurGyromite(Jeu _jeu) {
-        sizeX = jeu.SIZE_X;
+        sizeX = _jeu.SIZE_X;
         sizeY = _jeu.SIZE_Y;
         jeu = _jeu;
 
@@ -180,6 +181,8 @@ public class VueControleurGyromite extends JFrame implements Observer {
                     		if ((int) arg == Parameters.RETURN_TO_MENU) {
                     			setVisible(false);
                     			dispose();
+                    		} else {
+                    			mettreAJourAffichage();
                     		}
                     	} else {
                     		mettreAJourAffichage();
