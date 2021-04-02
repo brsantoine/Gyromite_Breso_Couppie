@@ -245,7 +245,6 @@ public class Jeu {
     
     public boolean niveauSuivant() {
     	niveauCourant++;
-    	System.out.println(niveauCourant);
     	if (niveauCourant > Parameters.NUMBER_OF_LEVELS) {
     		return false;
     	}

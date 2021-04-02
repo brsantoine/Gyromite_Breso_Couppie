@@ -12,8 +12,10 @@ import modele.plateau.Jeu;
 public class Main {
     public static void main(String[] args) {
     	Jeu jeu = new Jeu();
+    	
     	VueControleurMenu vm = new VueControleurMenu(jeu);
     	jeu.getOrdonnanceur().addObserver(vm);
+        
     	vm.setVisible(true);
     }
 }

@@ -24,6 +24,14 @@ public class Ordonnanceur extends Observable implements Runnable {
         pause = _pause;
         new Thread(this).start();
     }
+    
+    public void stop() {
+    	currentThread().interrupt();
+    }
+    
+    public void reprise() {
+    	currentThread().run();
+    }
 
     @Override
     public void run() {
