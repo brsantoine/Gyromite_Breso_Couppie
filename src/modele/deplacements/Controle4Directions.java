@@ -37,7 +37,7 @@ public class Controle4Directions extends RealisateurDeDeplacement {
                         // on ne peut pas sauter sans prendre appui
                         // (attention, test d'appui réalisé à partir de la position courante, si la gravité à été appliquée, il ne s'agit pas de la position affichée, amélioration possible)
                         Entite eBas = e.regarderDansLaDirection(Direction.bas);
-                        if (eBas != null && eBas.peutServirDeSupport()) {
+                        if ((eBas != null && eBas.peutServirDeSupport()) || (eBas == null && e.getCorde())) {
                             if (e.avancerDirectionChoisie(Direction.haut))
                                 ret = true;
                         }
@@ -46,7 +46,7 @@ public class Controle4Directions extends RealisateurDeDeplacement {
                     case bas:
                         // on ne peut desendre que sur une liane
                         eBas = e.regarderDansLaDirection(Direction.bas);
-                        if (eBas != null && eBas.peutPermettreDeMonterDescendre()) {
+                        if ((eBas != null && eBas.peutPermettreDeMonterDescendre()) || (eBas == null && e.getCorde())) {
                             if (e.avancerDirectionChoisie(Direction.bas))
                                 ret = true;
                         }

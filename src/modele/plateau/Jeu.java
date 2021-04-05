@@ -209,6 +209,14 @@ public class Jeu {
         return objetALaPosition(calculerPointCible(positionEntite, d));
     }
     
+    public boolean getCorde (Entite e) {
+        Point p = map.get(e);
+        if(objetALaPosition(p) instanceof Corde)
+            return true;
+        else
+            return false;
+    }
+    
     /** Si le déplacement de l'entité est autorisé (pas de mur ou autre entité), il est réalisé
      * Sinon, rien n'est fait.
      */

@@ -10,9 +10,10 @@ public class Gravite extends RealisateurDeDeplacement {
 
         for (EntiteDynamique e : lstEntitesDynamiques) {
             Entite eBas = e.regarderDansLaDirection(Direction.bas);
-            if ((eBas == null || (eBas != null && !eBas.peutServirDeSupport())) /*&& (e.peutPermettreDeMonterDescendre())*/) {
-                if (e.avancerDirectionChoisie(Direction.bas))
-                    ret = true;
+            if ( (eBas != null && !eBas.peutServirDeSupport()) || (eBas == null && !e.getCorde()) ) { /*&& (e.peutPermettreDeMonterDescendre())*/ 
+            	if (e.avancerDirectionChoisie(Direction.bas)) {
+                		ret = true;
+            	}   
             }
         }
 

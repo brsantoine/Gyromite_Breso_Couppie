@@ -1,8 +1,5 @@
 package modele.deplacements;
 
-import modele.plateau.Entite;
-import modele.plateau.EntiteDynamique;
-
 public class ColonneRouge2Direction extends Colonne {
 	
     // Design pattern singleton
