@@ -43,7 +43,7 @@ public class VueControleurGyromite implements Observer {
 	
 	// frameJeu
 	private int jeuSizeX, jeuSizeY;
-	private ImageIcon icoHero, icoVide, icoMur, icoCorde, icoDynamite, icoColonneRougeHaut, icoColonneRougeCentre, icoColonneRougeBas, icoColonneBleuHaut, icoColonneBleuCentre, icoColonneBleuBas;
+	private ImageIcon icoHero, icoHeroOnCorde, icoVide, icoMur, icoCorde, icoDynamite, icoColonneRougeHaut, icoColonneRougeCentre, icoColonneRougeBas, icoColonneBleuHaut, icoColonneBleuCentre, icoColonneBleuBas;
 	private JLabel[][] tabJLabel;
 	
 	//
@@ -208,6 +208,7 @@ public class VueControleurGyromite implements Observer {
 	
 	private void chargerLesIcones() {
         icoHero = chargerIcone("Images/Hector.png");
+        icoHeroOnCorde = chargerIcone("Images/HectorOnCorde.png");
         icoVide = chargerIcone("Images/Vide.png");
         icoColonneRougeHaut = chargerIcone("Images/ColonneRougeHaut.png");
         icoColonneRougeCentre = chargerIcone("Images/ColonneRougeCentre.png");
@@ -233,52 +234,54 @@ public class VueControleurGyromite implements Observer {
         return new ImageIcon(image);
     }
 	
-	private void mettreAJourAffichage() {
-        for (int x = 0; x < jeuSizeX; x++) {
-            for (int y = 0; y < jeuSizeY; y++) {
-                if (jeu.getGrille()[x][y] instanceof Mur) {
-                    tabJLabel[x][y].setIcon(icoMur);
-                } else if (jeu.getGrille()[x][y] instanceof Colonne) {
-                    Colonne colonne = ((Colonne) jeu.getGrille()[x][y]);
-                    switch ( colonne.getType() ) {
-                    case "Centre" :
-                        if (colonne.getCouleur().equals("Rouge")) {
-                            tabJLabel[x][y].setIcon(icoColonneRougeCentre);
-                        } else {
-                            tabJLabel[x][y].setIcon(icoColonneBleuCentre);
-                        }
-                        break;
-                    case "Haut" :
-                        if (colonne.getCouleur().equals("Rouge")) {
-                            tabJLabel[x][y].setIcon(icoColonneRougeHaut);
-                        } else {
-                            tabJLabel[x][y].setIcon(icoColonneBleuHaut);
-                        }
-                        break;
-                    case "Bas" :
-                        if (colonne.getCouleur().equals("Rouge")) {
-                            tabJLabel[x][y].setIcon(icoColonneRougeBas);
-                        } else {
-                            tabJLabel[x][y].setIcon(icoColonneBleuBas);
-                        }
-                        break;
-                    }
-                } else if (jeu.getGrille()[x][y] instanceof Corde) {
-                    tabJLabel[x][y].setIcon(icoCorde);
-                } else if(jeu.getGrille()[x][y] instanceof Dynamite) {
-                    tabJLabel[x][y].setIcon(icoDynamite);
-                } else {
-                    tabJLabel[x][y].setIcon(icoVide);
-                }
-                if (jeu.getGrilleDynamique()[x][y] instanceof Heros) {
-                    tabJLabel[x][y].setIcon(icoHero);
-                }
-            }
-        }
-        
-        ((JLabel) infoPanelScore.getComponent(1)).setText(Integer.toString(jeu.getScore()));
-        timeText.setText(Integer.toString(jeu.getTime()));
-    }
+	public void mettreAJourAffichage() {
+		for (int x = 0; x < jeuSizeX; x++) {
+	        for (int y = 0; y < jeuSizeY; y++) {
+	            if (jeu.getGrille()[x][y] instanceof Mur) {
+	                tabJLabel[x][y].setIcon(icoMur);
+	            } else if (jeu.getGrille()[x][y] instanceof Colonne) {
+	                Colonne colonne = ((Colonne) jeu.getGrille()[x][y]);
+	                switch ( colonne.getType() ) {
+	                case "Centre" :
+	                    if (colonne.getCouleur().equals("Rouge")) {
+	                        tabJLabel[x][y].setIcon(icoColonneRougeCentre);
+	                    } else {
+	                        tabJLabel[x][y].setIcon(icoColonneBleuCentre);
+	                    }
+	                    break;
+	                case "Haut" :
+	                    if (colonne.getCouleur().equals("Rouge")) {
+	                        tabJLabel[x][y].setIcon(icoColonneRougeHaut);
+	                    } else {
+	                        tabJLabel[x][y].setIcon(icoColonneBleuHaut);
+	                    }
+	                    break;
+	                case "Bas" :
+	                    if (colonne.getCouleur().equals("Rouge")) {
+	                        tabJLabel[x][y].setIcon(icoColonneRougeBas);
+	                    } else {
+	                        tabJLabel[x][y].setIcon(icoColonneBleuBas);
+	                    }
+	                    break;
+	                }
+	            } else if (jeu.getGrille()[x][y] instanceof Corde) {
+	                if(jeu.getGrilleDynamique()[x][y] instanceof Heros)
+	                    tabJLabel[x][y].setIcon(icoHeroOnCorde);
+	                else
+	                    tabJLabel[x][y].setIcon(icoCorde);
+	            } else if(jeu.getGrille()[x][y] instanceof Dynamite) {
+	                tabJLabel[x][y].setIcon(icoDynamite);
+	            } else if (jeu.getGrilleDynamique()[x][y] instanceof Heros) {
+	                tabJLabel[x][y].setIcon(icoHero);
+	            } else {
+	                tabJLabel[x][y].setIcon(icoVide);
+	            }
+	        }
+	        
+	        ((JLabel) infoPanelScore.getComponent(1)).setText(Integer.toString(jeu.getScore()));
+	        timeText.setText(Integer.toString(jeu.getTime()));
+	    }
+	}
 	
 	@Override
 	public void update(Observable arg0, Object arg1) {

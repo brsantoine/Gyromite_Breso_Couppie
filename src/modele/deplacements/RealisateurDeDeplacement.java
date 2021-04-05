@@ -14,7 +14,7 @@ public abstract class RealisateurDeDeplacement {
     public void addEntiteDynamique(EntiteDynamique ed) {lstEntitesDynamiques.add(ed);};
 
     public void AddColonneEntiere(ArrayList<EntiteDynamique> lstC) {
-        System.out.println("nombre de colonne :" + lstColonneE.size());
+    	lstColonneE.add(lstC);
     }
 
 }
