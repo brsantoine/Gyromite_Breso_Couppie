@@ -4,11 +4,17 @@ import modele.plateau.EntiteDynamique;
 import java.util.ArrayList;
 
 /**
-Tous les dÃ©placement sont dÃ©clenchÃ©s par cette classe (gravitÃ©, controle clavier, IA, etc.)
+Tous les déplacement sont déclenchés par cette classe (gravité, controle clavier, IA, etc.)
  */
 public abstract class RealisateurDeDeplacement {
     protected ArrayList<EntiteDynamique> lstEntitesDynamiques = new ArrayList<EntiteDynamique>();
+    protected ArrayList<ArrayList<EntiteDynamique>> lstColonneE = new ArrayList<ArrayList<EntiteDynamique>>();
     protected abstract boolean realiserDeplacement();
 
     public void addEntiteDynamique(EntiteDynamique ed) {lstEntitesDynamiques.add(ed);};
+
+    public void AddColonneEntiere(ArrayList<EntiteDynamique> lstC) {
+        System.out.println("nombre de colonne :" + lstColonneE.size());
+    }
+
 }

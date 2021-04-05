@@ -25,20 +25,14 @@ public class Ordonnanceur extends Observable implements Runnable {
         new Thread(this).start();
     }
     
-    public void stop() {
-    	currentThread().interrupt();
-    }
-    
-    public void reprise() {
-    	currentThread().run();
-    }
-
     @Override
     public void run() {
         boolean update = false;
 
         while(true) {
         	if (jeu.niveauFinit()) {
+        		setChanged();
+            	notifyObservers(new Integer(Parameters.NEXT_LEVEL));
         		if (!jeu.niveauSuivant()) {
         			setChanged();
                 	notifyObservers(new Integer(Parameters.RETURN_TO_MENU));

@@ -14,11 +14,16 @@ import modele.deplacements.Ordonnanceur;
 import utils.Parameters;
 
 import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+
+import javax.swing.Timer;
 
 /** Actuellement, cette classe garde les postions
  * (ajouter conditions de victoire, chargement du plateau, etc.)
@@ -43,10 +48,17 @@ public class Jeu {
     private Ordonnanceur ordonnanceur = new Ordonnanceur(this);
 
     private int niveauCourant;
+    private int score;
+    private int temps;
+    private Timer tempsThread = new Timer(1000, new ActionListener() {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			temps -= 1;
+		}
+	});
     
     public Jeu() {
     	initialiserOrdonnanceur();
-    	niveauCourant = 0;
         hector = new Heros(this);
         gravite.addEntiteDynamique(hector);
         Controle4Directions.getInstance().addEntiteDynamique(hector);
@@ -70,6 +82,14 @@ public class Jeu {
     
     public Heros getHector() {
         return hector;
+    }
+    
+    public int getScore() {
+    	return score;
+    }
+    
+    public int getTime() {
+    	return temps;
     }
   
     public void initialiserOrdonnanceur() {
@@ -124,41 +144,49 @@ public class Jeu {
     	    if (hector == null) {
     	    	throw new Exception("Hector non initialisé !");
     	    }
-    	    
     	    while ((line = br.readLine()) != null && line.charAt(0) != '#') {
     	    	String[] lineSplit = line.split(";");
     	    	int x = Integer.parseInt(lineSplit[1]);
     	    	int y = Integer.parseInt(lineSplit[2]);
     	    	int yFin = Integer.parseInt(lineSplit[3]);
-    	    	
+
+                ArrayList<EntiteDynamique> lstColonne = new ArrayList<EntiteDynamique>();
+
     	    	Colonne c = new Colonne(this, lineSplit[0], "Haut");
     			addEntite(c, x, y);
-    			if (c.getCouleur().equals("Rouge"))
-    				ColonneRouge2Direction.getInstance().addEntiteDynamique(c);
-				else 
-					ColonneBleue2Direction.getInstance().addEntiteDynamique(c);
-    	 
+                lstColonne.add(c);
+                if (c.getCouleur().equals("Rouge"))
+                    ColonneRouge2Direction.getInstance().addEntiteDynamique(c);
+
+                else
+                    ColonneBleue2Direction.getInstance().addEntiteDynamique(c);
+
     	    	
     			for (int i = y+1; i < yFin; i++) {
     				c = new Colonne(this, lineSplit[0], "Centre");
     				addEntite(c, x, i);
-    				
-    				if (c.getCouleur().equals("Rouge"))
-        				ColonneRouge2Direction.getInstance().addEntiteDynamique(c);
-    				else 
-    					ColonneBleue2Direction.getInstance().addEntiteDynamique(c);
+                    lstColonne.add(c);
+                    if (c.getCouleur().equals("Rouge"))
+                        ColonneRouge2Direction.getInstance().addEntiteDynamique(c);
+                    else
+                        ColonneBleue2Direction.getInstance().addEntiteDynamique(c);
     			}
     			c = new Colonne(this, lineSplit[0], "Bas");
     			addEntite(c, x, yFin);
-    			
-    			if (c.getCouleur().equals("Rouge"))
-    				ColonneRouge2Direction.getInstance().addEntiteDynamique(c);
-				else 
-					ColonneBleue2Direction.getInstance().addEntiteDynamique(c);
-    	    	
+
+    			if (c.getCouleur().equals("Rouge")) {
+                    ColonneRouge2Direction.getInstance().addEntiteDynamique(c);
+                    lstColonne.add(c);
+                    ColonneRouge2Direction.getInstance().AddColonneEntiere(lstColonne);
+                }
+				else {
+                    ColonneBleue2Direction.getInstance().addEntiteDynamique(c);
+                    lstColonne.add(c);
+                    ColonneBleue2Direction.getInstance().AddColonneEntiere(lstColonne);
+                }
     	    }
     	} catch (Exception e) {
-    	    System.out.println("GENERATION MAPS : Lecture de fichier ratï¿½ (Niveau " + numeroNiveau + ")\n");
+    	    System.out.println("GENERATION MAPS : Lecture de fichier raté (Niveau " + numeroNiveau + ")\n");
     	    System.out.println(e.getMessage());
     	}
     }
@@ -212,7 +240,11 @@ public class Jeu {
         }
 
         if (retour) {
-            deplacerEntite(pCourant, pCible, e);
+            if(e instanceof Heros) {
+                deplacerHero(pCourant, pCible, e);
+            } else {
+                deplacerEntite(pCourant, pCible, e);
+            }
             recupDynamite(pCible);
         }
 
@@ -234,9 +266,15 @@ public class Jeu {
         return pCible;
     }
     
-    private void deplacerEntite(Point pCourant, Point pCible, Entite e) {
+    private void deplacerHero(Point pCourant, Point pCible, Entite e) {
         grilleEntitesDynamique[pCourant.x][pCourant.y] = null;
         grilleEntitesDynamique[pCible.x][pCible.y] = e;
+        map.put(e, pCible);
+    }
+
+    private void deplacerEntite(Point pCourant, Point pCible, Entite e) {
+        grilleEntites[pCourant.x][pCourant.y] = null;
+        grilleEntites[pCible.x][pCible.y] = e;
         map.put(e, pCible);
     }
     
@@ -259,10 +297,14 @@ public class Jeu {
 
     public boolean debutPartie() {
         niveauCourant = 1;
+        score = 0;
         if (niveauCourant > Parameters.NUMBER_OF_LEVELS) {
             return false;
         }
         initialisationDuMonde(niveauCourant);
+        
+        temps = 999;
+        tempsThread.start();
         return true;
     }
 
@@ -272,17 +314,21 @@ public class Jeu {
     		return false;
     	}
     	initialisationDuMonde(niveauCourant);
+    	
+    	temps = 999;
+    	tempsThread.start();
     	return true;
     }
     
     public boolean niveauFinit() {
-
         for(int i=0; i< SIZE_X; i++) {
             for (int j=0; j< SIZE_Y; j++) {
                 if (grilleEntites[i][j] instanceof Dynamite)
                     return false;
             }
         }
+        tempsThread.stop();
+        score += temps*10;
         return true;
     }
 
@@ -291,7 +337,10 @@ public class Jeu {
     }
 
     private void recupDynamite(Point pCourant) {
-        if (grilleEntites[pCourant.x][pCourant.y] instanceof Dynamite)
-            grilleEntites[pCourant.x][pCourant.y] = null;
+        if (grilleEntites[pCourant.x][pCourant.y] instanceof Dynamite) {
+        	grilleEntites[pCourant.x][pCourant.y] = null;
+        	score += 100;
+        }
+            
     }
 }

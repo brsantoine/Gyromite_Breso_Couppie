@@ -11,6 +11,9 @@ public abstract class Parameters {
 	public static final Integer MENU_WIDTH = (int) 600;
 	public static final Integer MENU_HEIGHT = (int) 800;
 	
+	public static final Integer SCORE_WIDTH = (int) screenSize.getWidth()/2;
+	public static final Integer SCORE_HEIGHT = (int) 128;
+	
 	public static final Integer IMAGE_SIZE = (int) 64;
 	
 	// RESPONSIVE 
@@ -22,5 +25,5 @@ public abstract class Parameters {
     // LEVEL
     public static final Integer RETURN_TO_MENU = 0;
     public static final Integer NEXT_LEVEL = 1;
-    public static final Integer NUMBER_OF_LEVELS = 1;
+    public static final Integer NUMBER_OF_LEVELS = 2;
 }

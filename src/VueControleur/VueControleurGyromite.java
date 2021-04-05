@@ -1,6 +1,7 @@
 package VueControleur;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -48,7 +49,8 @@ public class VueControleurGyromite implements Observer {
 	//
 	private JFrame frameMenu, frameJeu;
 	
-	private JPanel menuPanelBoutons;
+	private JLabel timeText;
+	private JPanel menuPanelBoutons, panelInformations, infoPanelScore;
 	private JButton menuBoutonPlay, menuBoutonRules, menuBoutonHS, menuBoutonQuit;
 	
 	public VueControleurGyromite(Jeu _jeu) {
@@ -108,7 +110,7 @@ public class VueControleurGyromite implements Observer {
                 
                 if (jeu.debutPartie()) {
                 	frameJeu.setVisible(true);
-                	jeu.start(300);
+                	jeu.start(250);
                 }
            } 
         });
@@ -128,9 +130,45 @@ public class VueControleurGyromite implements Observer {
 	private void creerJeu() {
 		frameJeu = new JFrame();
         frameJeu.setTitle("Gyromite");
-        frameJeu.setSize(jeuSizeX*Parameters.IMAGE_SIZE, jeuSizeY*Parameters.IMAGE_SIZE);
+        frameJeu.setSize(jeuSizeX*Parameters.IMAGE_SIZE, jeuSizeY*Parameters.IMAGE_SIZE + Parameters.SCORE_HEIGHT);
+        frameJeu.setLocation(0, 2*Parameters.IMAGE_SIZE);
         frameJeu.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // permet de terminer l'application à la fermeture de la fenêtre
 
+        frameJeu.setLayout(new BorderLayout(0,0));
+        
+        ///////////
+        // SCORE //
+        ///////////
+        panelInformations = new JPanel();
+        panelInformations.setLayout(new BorderLayout(0,0));
+        panelInformations.setSize(Parameters.SCORE_WIDTH, Parameters.SCORE_HEIGHT);
+        panelInformations.setVisible(true);
+       
+        infoPanelScore = new JPanel();
+        infoPanelScore.setLayout(new BorderLayout(0, 0));
+        
+        JLabel scoreText = new JLabel("Score");
+        scoreText.setFont(scoreText.getFont().deriveFont(64.0f));
+        JLabel score = new JLabel("");
+        score.setFont(scoreText.getFont());
+        
+        infoPanelScore.add(scoreText, BorderLayout.WEST);
+        infoPanelScore.add(score, BorderLayout.EAST);
+        panelInformations.add(infoPanelScore, BorderLayout.WEST);
+        
+        // JPanel du temps
+        timeText = new JLabel("");
+        timeText.setFont(scoreText.getFont());
+        panelInformations.add(timeText, BorderLayout.EAST);
+        
+        frameJeu.add(panelInformations, BorderLayout.NORTH);
+        
+	    ////////////
+	    // GRILLE //
+	    ////////////
+        JPanel panelGrille = new JPanel();
+        panelGrille.setPreferredSize(new Dimension(jeuSizeX*Parameters.IMAGE_SIZE, jeuSizeY*Parameters.IMAGE_SIZE));
+        
         JComponent grilleJLabels = new JPanel(new GridLayout(jeuSizeY, jeuSizeX)); // grilleJLabels va contenir les cases graphiques et les positionner sous la forme d'une grille
 
         tabJLabel = new JLabel[jeuSizeX][jeuSizeY];
@@ -142,7 +180,9 @@ public class VueControleurGyromite implements Observer {
                 grilleJLabels.add(jlab);
             }
         }
-        frameJeu.add(grilleJLabels);
+        panelGrille.add(grilleJLabels);
+        
+        frameJeu.add(panelGrille, BorderLayout.CENTER);
         
         chargerLesIcones();
         ajouterEcouteurClavier();
@@ -194,7 +234,6 @@ public class VueControleurGyromite implements Observer {
     }
 	
 	private void mettreAJourAffichage() {
-
         for (int x = 0; x < jeuSizeX; x++) {
             for (int y = 0; y < jeuSizeY; y++) {
                 if (jeu.getGrille()[x][y] instanceof Mur) {
@@ -236,6 +275,9 @@ public class VueControleurGyromite implements Observer {
                 }
             }
         }
+        
+        ((JLabel) infoPanelScore.getComponent(1)).setText(Integer.toString(jeu.getScore()));
+        timeText.setText(Integer.toString(jeu.getTime()));
     }
 	
 	@Override
@@ -248,7 +290,10 @@ public class VueControleurGyromite implements Observer {
             			frameJeu.setVisible(false);
             			frameJeu.dispose();
             			frameMenu.setVisible(true);
-            		}
+            		} /*else if ((int) arg1 == Parameters.NEXT_LEVEL) {
+            			int currentScore = Integer.parseInt(((JLabel) infoPanelScore.getComponent(1)).getText());
+            			((JLabel) infoPanelScore.getComponent(1)).setText(Integer.toString(currentScore + jeu.getTime()*10));
+            		}*/
             	} else {
             		mettreAJourAffichage();
             	}
